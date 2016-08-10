@@ -140,9 +140,10 @@ class SessionRedirectMixin(object):
 
             # https://github.com/kennethreitz/requests/issues/1084
             if resp.status_code not in (codes.temporary_redirect, codes.permanent_redirect):
-                if 'Content-Length' in prepared_request.headers:
-                    del prepared_request.headers['Content-Length']
-
+                # https://github.com/kennethreitz/requests/issues/3490
+                for header_name in ['Content-Length', 'Content-Type', 'Transfer-Encoding']:
+                    if header_name in prepared_request.headers:
+                        del prepared_request.headers[header_name]
                 prepared_request.body = None
 
             headers = prepared_request.headers
