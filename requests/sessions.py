@@ -138,19 +138,18 @@ class SessionRedirectMixin(object):
 
             self.rebuild_method(prepared_request, resp)
 
+            headers = prepared_request.headers
+
             # https://github.com/kennethreitz/requests/issues/1084
             if resp.status_code not in (codes.temporary_redirect, codes.permanent_redirect):
                 # https://github.com/kennethreitz/requests/issues/3490
                 for header_name in ['Content-Length', 'Content-Type', 'Transfer-Encoding']:
-                    if header_name in prepared_request.headers:
-                        del prepared_request.headers[header_name]
+                    if header_name in headers:
+                        del headers[header_name]
                 prepared_request.body = None
 
-            headers = prepared_request.headers
-            try:
+            if 'Cookie' in headers:
                 del headers['Cookie']
-            except KeyError:
-                pass
 
             # Extract any cookies sent on the response to the cookiejar
             # in the new request. Because we've mutated our copied prepared
